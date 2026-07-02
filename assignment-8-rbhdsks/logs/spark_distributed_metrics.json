@@ -1,0 +1,12 @@
+{
+  "1_ingestion_sec": 7.396,
+  "2_cleansing_sec": 20.71,
+  "3a_heavy_join_sec": 16.606,
+  "3b_python_udf_sec": 34.457,
+  "4_export_sec": 35.79,
+  "total_sec": 116.908,
+  "framework": "spark",
+  "master": "spark://192.168.0.134:7077",
+  "initial_rows": 19493620,
+  "final_rows": 18271535
+}

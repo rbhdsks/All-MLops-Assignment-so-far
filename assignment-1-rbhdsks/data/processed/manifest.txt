@@ -1,0 +1,59 @@
+
+Version: v1.csv
+Created on: 2026-02-11 17:47:08.095491
+Changes:
+- Dropped UDI and Product ID (if present)
+- Label encoded Type column
+- Selected first 7000 rows for training
+Source: data/raw/ai4i2020.csv
+Script: data_prep.py
+Total Rows After Processing: 7000
+Total Columns After Processing: 12
+
+So the final shape is : (7000, 12)
+
+now that, 
+DATA VERSION: v2.csv
+PURPOSE: Feature-engineered dataset with scaled numeric values.
+
+========================================
+DATA VERSION: day2.csv (Production Simulation)
+CREATED ON: 2026-02-15 14:55:44.554035
+SOURCE FILE: data/raw/ai4i2020.csv
+SCRIPT USED: src/day2_generation.py
+
+TRANSFORMATIONS:
+- Selected rows 7000–8000 (future timeframe simulation)
+- Increased Air temperature by +1K
+- Increased Torque by 1%
+- Added small Gaussian noise (mean=0, std=0.05) to numeric features
+- No shuffling applied
+
+DATA SHAPE:
+- Rows: 1000
+- Columns: 12
+
+PURPOSE:
+Simulated production dataset for drift monitoring and evaluation.
+----------------------------------------
+
+========================================
+DATA VERSION: day2.csv (Production Simulation)
+CREATED ON: 2026-02-15 15:53:42.276743
+SOURCE FILE: data/raw/ai4i2020.csv
+SCRIPT USED: src/day2_generation.py
+
+TRANSFORMATIONS:
+- Selected rows 7000–8000 (future timeframe simulation)
+- Increased Air temperature by +1K
+- Increased Torque by 1%
+- Added small Gaussian noise (mean=0, std=0.05) to numeric features
+- No shuffling applied
+
+DATA SHAPE:
+- Rows: 1000
+- Columns: 12
+
+PURPOSE:
+Simulated production dataset for drift monitoring and evaluation.
+----------------------------------------

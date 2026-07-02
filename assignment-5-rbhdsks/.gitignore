@@ -1,0 +1,8 @@
+venv/
+prometheus_data/
+alertmanager_data/
+alertmanager-0.27.0.darwin-arm64/
+alertmanager-0.27.0.darwin-arm64.tar.gz
+__pycache__/
+*.pyc
+.DS_Store

@@ -1,0 +1,15 @@
+project_name: "Manual_MLOps_Project"
+
+data:
+  raw_path: "data/raw/ai4i2020.csv"
+  processed_path: "data/processed/v1.csv"
+  train_rows: 7000
+
+model:
+  type: "RandomForest"
+  n_estimators: 50
+  random_state: 42
+
+monitoring:
+  error_threshold: 0.25
+

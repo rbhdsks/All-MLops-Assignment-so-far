@@ -1,0 +1,43 @@
+augmentation:
+  horizontal_flip_prob: 0.5
+  randaugment_m: 9
+  randaugment_n: 2
+  random_erasing_prob: 0.2
+  use_randaugment: true
+base:
+  image_size: 224
+  min_images_per_class: 3
+  random_seed: 42
+cnn:
+  batch_size: 32
+  early_stopping_patience: 7
+  freeze_epochs: 3
+  label_smoothing: 0.1
+  learning_rate_backbone: 0.0001
+  learning_rate_head: 0.001
+  model_name: efficientnet_b0
+  pretrained: true
+  scheduler: cosine
+  total_epochs: 30
+  weight_decay: 0.0001
+mlp:
+  batch_size: 32
+  dropout: 0.4
+  early_stopping_patience: 10
+  epochs: 50
+  hidden_layers:
+  - 512
+  - 256
+  - 128
+  learning_rate: 0.001
+split:
+  test_size: 0.1
+  val_size: 0.2
+svm:
+  C: 100.0
+  feature_type: hog
+  gamma: scale
+  hog_cells_per_block: 2
+  hog_orientations: 9
+  hog_pixels_per_cell: 16
+  kernel: rbf

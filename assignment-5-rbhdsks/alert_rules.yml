@@ -1,0 +1,80 @@
+groups:
+  - name: app_alerts
+    rules:
+
+      - alert: AppDown
+        expr: up{job="captioning_app"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Captioning app is down"
+          description: "App has been unreachable for 30s."
+
+      - alert: HighErrorRate
+        expr: rate(captioning_errors_total[5m]) > 0.05
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High error rate detected"
+          description: "More than 0.05 errors/sec over last 5 minutes."
+
+      - alert: SlowInference
+        expr: histogram_quantile(0.95, rate(captioning_inference_latency_seconds_bucket[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Inference latency too high"
+          description: "P95 latency has exceeded 10s for 2 minutes."
+
+      - alert: TooManyActiveRequests
+        expr: captioning_active_requests > 5
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Too many concurrent requests"
+          description: "More than 5 requests in-flight for over 1 minute."
+
+  - name: system_alerts
+    rules:
+
+      - alert: HighCPUUsage
+        expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU usage above 80%"
+          description: "CPU has been over 80% for 2 or more minutes."
+
+      - alert: HighMemoryUsage
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAM usage above 85%"
+          description: "System memory is running low."
+
+      - alert: HighDiskUsage
+        expr: (1 - (node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Disk usage above 85%"
+          description: "Root disk is over 85% full."
+
+  - name: recording_rules
+    rules:
+      - record: job:captioning_inference_latency:p95
+        expr: histogram_quantile(0.95, rate(captioning_inference_latency_seconds_bucket[5m]))
+
+      - record: job:captioning_inference_latency:p50
+        expr: histogram_quantile(0.50, rate(captioning_inference_latency_seconds_bucket[5m]))
+
+      - record: job:cpu_usage:avg
+        expr: 100 - (avg by(instance)(rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100)

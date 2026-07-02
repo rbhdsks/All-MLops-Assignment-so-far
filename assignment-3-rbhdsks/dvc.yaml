@@ -1,0 +1,130 @@
+stages:
+
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - src/prepare.py
+    - data/raw
+    params:
+    - base.random_seed
+    - base.image_size
+    - base.min_images_per_class
+    - split.test_size
+    - split.val_size
+    outs:
+    - data_processed/v1_resized
+    - splits/train.csv
+    - splits/val.csv
+    - splits/test.csv
+    - splits/label_map.csv
+
+  transform:
+    cmd: python src/transform.py
+    deps:
+    - src/transform.py
+    - data_processed/v1_resized
+    - splits/train.csv
+    - splits/val.csv
+    - splits/test.csv
+    params:
+    - svm.hog_orientations
+    - svm.hog_pixels_per_cell
+    - svm.hog_cells_per_block
+    - augmentation
+    outs:
+    - features/hog_train.npz
+    - features/hog_val.npz
+    - features/hog_test.npz
+    - data_processed/v2_augmented/augmentation_config.yaml
+
+  train_svm:
+    cmd: python src/train_svm.py
+    deps:
+    - src/train_svm.py
+    - features/hog_train.npz
+    - features/hog_val.npz
+    params:
+    - base.random_seed
+    - svm.kernel
+    - svm.C
+    - svm.gamma
+    outs:
+    - models/svm_model.pkl
+    metrics:
+    - models/svm_val_metrics.json:
+        cache: false
+
+  train_mlp:
+    cmd: python src/train_mlp.py
+    deps:
+    - src/train_mlp.py
+    - features/hog_train.npz
+    - features/hog_val.npz
+    params:
+    - base.random_seed
+    - mlp.hidden_layers
+    - mlp.dropout
+    - mlp.learning_rate
+    - mlp.epochs
+    - mlp.batch_size
+    - mlp.early_stopping_patience
+    outs:
+    - models/mlp_model.pt
+    - models/mlp_scaler.pkl
+    - models/mlp_history.json
+    metrics:
+    - models/mlp_val_metrics.json:
+        cache: false
+
+  train_cnn:
+    cmd: python src/train_cnn.py
+    deps:
+    - src/train_cnn.py
+    - data_processed/v1_resized
+    - splits/trainval.csv
+    - splits/label_map.csv
+    params:
+    - base.random_seed
+    - base.image_size
+    - augmentation
+    - cnn
+    outs:
+    - models/cnn_history.json
+    - models/cnn_best.pt
+    metrics:
+    - models/cnn_val_metrics.json:
+        cache: false
+
+
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - src/evaluate.py
+    - src/train_mlp.py
+    - models/svm_model.pkl
+    - models/mlp_model.pt
+    - models/mlp_scaler.pkl
+    - models/cnn_best.pt
+    - features/hog_test.npz
+    - splits/test.csv
+    - splits/label_map.csv
+    outs:
+    - metrics/cnn_results.csv
+    - metrics/svm_results.csv
+    - metrics/mlp_results.csv
+    metrics:
+    - metrics/metrics.json:
+        cache: false
+    plots:
+    - metrics/cnn_history.csv:
+        x: epoch
+        y: val_f1
+        title: "EfficientNet val F1 per epoch"
+    - metrics/mlp_history.csv:
+        x: epoch
+        y: val_macro_f1
+        title: "MLP val F1 per epoch"
+    - metrics/all_models_f1.csv:
+        x: class
+        y: f1
+        title: "Per-class F1 all models"

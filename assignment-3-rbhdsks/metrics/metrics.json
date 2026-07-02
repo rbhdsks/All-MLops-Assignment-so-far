@@ -1,0 +1,12 @@
+{
+  "svm": {
+    "test_macro_f1": 0.0974
+  },
+  "mlp": {
+    "test_macro_f1": 0.1168
+  },
+  "efficientnet": {
+    "test_macro_f1": 0.4293
+  },
+  "best_model": "efficientnet"
+}

@@ -1,0 +1,12 @@
+{
+  "1_ingestion_sec": 89.597,
+  "2_cleansing_sec": 96.131,
+  "3a_heavy_join_sec": 78.621,
+  "3b_python_udf_sec": 86.049,
+  "4_export_sec": 88.604,
+  "total_sec": 439.084,
+  "framework": "ray",
+  "address": "auto",
+  "initial_rows": 19493620,
+  "final_rows": 18272001
+}

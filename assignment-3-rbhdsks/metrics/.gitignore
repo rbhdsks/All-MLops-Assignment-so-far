@@ -1,0 +1,6 @@
+/cnn_results.csv
+/svm_results.csv
+/mlp_results.csv
+/cnn_history.csv
+/mlp_history.csv
+/all_models_f1.csv

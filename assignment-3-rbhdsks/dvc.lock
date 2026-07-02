@@ -1,0 +1,292 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py
+    deps:
+    - path: data/raw
+      hash: md5
+      md5: e0fbff6bf62b6edb03d52762154cb288.dir
+      size: 146005799
+      nfiles: 1094
+    - path: src/prepare.py
+      hash: md5
+      md5: 74446702680048d45830a9a01a916391
+      size: 6637
+    params:
+      params.yaml:
+        base.image_size: 224
+        base.min_images_per_class: 3
+        base.random_seed: 42
+        split.test_size: 0.1
+        split.val_size: 0.2
+    outs:
+    - path: data_processed/v1_resized
+      hash: md5
+      md5: 6da58160f628b4212a14b7e8df3cc39f.dir
+      size: 26886475
+      nfiles: 1084
+    - path: splits/label_map.csv
+      hash: md5
+      md5: 1ef23cad58845defb8e5aa4aaf043382
+      size: 247
+    - path: splits/test.csv
+      hash: md5
+      md5: be93761b4524ddfdccb38cc3dd2a9b74
+      size: 7123
+    - path: splits/train.csv
+      hash: md5
+      md5: a1c204647998f5d18eeb78abbb827533
+      size: 50855
+    - path: splits/val.csv
+      hash: md5
+      md5: 998460f9da1193cee4c48383405be115
+      size: 12677
+  transform:
+    cmd: python src/transform.py
+    deps:
+    - path: data_processed/v1_resized
+      hash: md5
+      md5: 6da58160f628b4212a14b7e8df3cc39f.dir
+      size: 26886475
+      nfiles: 1084
+    - path: splits/test.csv
+      hash: md5
+      md5: be93761b4524ddfdccb38cc3dd2a9b74
+      size: 7123
+    - path: splits/train.csv
+      hash: md5
+      md5: a1c204647998f5d18eeb78abbb827533
+      size: 50855
+    - path: splits/val.csv
+      hash: md5
+      md5: 998460f9da1193cee4c48383405be115
+      size: 12677
+    - path: src/transform.py
+      hash: md5
+      md5: 34340d9e831185d79e0bedf39eba9787
+      size: 4950
+    params:
+      params.yaml:
+        augmentation:
+          horizontal_flip_prob: 0.5
+          randaugment_m: 9
+          randaugment_n: 2
+          random_erasing_prob: 0.2
+          use_randaugment: true
+        svm.hog_cells_per_block: 2
+        svm.hog_orientations: 9
+        svm.hog_pixels_per_cell: 16
+    outs:
+    - path: data_processed/v2_augmented/augmentation_config.yaml
+      hash: md5
+      md5: 57786bbc181e90054d333517d0ee3d96
+      size: 262
+    - path: features/hog_test.npz
+      hash: md5
+      md5: fd9f137ca43ac149db816002c7abec6e
+      size: 2100315
+    - path: features/hog_train.npz
+      hash: md5
+      md5: ca0262e79523ad04574241c4c40b1df7
+      size: 15045356
+    - path: features/hog_val.npz
+      hash: md5
+      md5: a8e7c80519769799eea6f4004f39fa66
+      size: 3759042
+  train_svm:
+    cmd: python src/train_svm.py
+    deps:
+    - path: features/hog_train.npz
+      hash: md5
+      md5: ca0262e79523ad04574241c4c40b1df7
+      size: 15045356
+    - path: features/hog_val.npz
+      hash: md5
+      md5: a8e7c80519769799eea6f4004f39fa66
+      size: 3759042
+    - path: src/train_svm.py
+      hash: md5
+      md5: a8684b325cc834937cf85f61cbb120a3
+      size: 4884
+    params:
+      params.yaml:
+        base.random_seed: 42
+        svm.C: 100.0
+        svm.gamma: scale
+        svm.kernel: rbf
+    outs:
+    - path: models/svm_model.pkl
+      hash: md5
+      md5: 696c075cc47cca7e128d9603d25f5118
+      size: 8117890
+    - path: models/svm_val_metrics.json
+      hash: md5
+      md5: d6ba6ea00b2d6a651842cc522179729f
+      size: 28
+  train_mlp:
+    cmd: python src/train_mlp.py
+    deps:
+    - path: features/hog_train.npz
+      hash: md5
+      md5: ca0262e79523ad04574241c4c40b1df7
+      size: 15045356
+    - path: features/hog_val.npz
+      hash: md5
+      md5: a8e7c80519769799eea6f4004f39fa66
+      size: 3759042
+    - path: src/train_mlp.py
+      hash: md5
+      md5: 2c9b7990e2ef46e0df357b29e69a1035
+      size: 8216
+    params:
+      params.yaml:
+        base.random_seed: 42
+        mlp.batch_size: 32
+        mlp.dropout: 0.4
+        mlp.early_stopping_patience: 10
+        mlp.epochs: 50
+        mlp.hidden_layers:
+        - 512
+        - 256
+        - 128
+        mlp.learning_rate: 0.001
+    outs:
+    - path: models/mlp_history.json
+      hash: md5
+      md5: 691e0182e0028f2fdd10049024f95529
+      size: 1427
+    - path: models/mlp_model.pt
+      hash: md5
+      md5: 6612771b4c56bcefeaa32d8373618d0e
+      size: 13151000
+    - path: models/mlp_scaler.pkl
+      hash: md5
+      md5: 6bc7ff1941ede6d0272222dfc22f18e1
+      size: 146488
+    - path: models/mlp_val_metrics.json
+      hash: md5
+      md5: 53e79e84602e572ebf2a69740c13c839
+      size: 28
+  train_cnn:
+    cmd: python src/train_cnn.py
+    deps:
+    - path: data_processed/v1_resized
+      hash: md5
+      md5: 6da58160f628b4212a14b7e8df3cc39f.dir
+      size: 26886475
+      nfiles: 1084
+    - path: splits/label_map.csv
+      hash: md5
+      md5: 1ef23cad58845defb8e5aa4aaf043382
+      size: 247
+    - path: splits/trainval.csv
+      hash: md5
+      md5: 2bbc588455b30318a2880de49835955f
+      size: 63507
+    - path: src/train_cnn.py
+      hash: md5
+      md5: d42622c20eff4ab3bae17cb0bccbaaec
+      size: 11776
+    params:
+      params.yaml:
+        augmentation:
+          horizontal_flip_prob: 0.5
+          randaugment_m: 9
+          randaugment_n: 2
+          random_erasing_prob: 0.2
+          use_randaugment: true
+        base.image_size: 224
+        base.random_seed: 42
+        cnn:
+          batch_size: 32
+          early_stopping_patience: 7
+          freeze_epochs: 3
+          label_smoothing: 0.1
+          learning_rate_backbone: 0.0001
+          learning_rate_head: 0.001
+          model_name: efficientnet_b0
+          pretrained: true
+          scheduler: cosine
+          total_epochs: 30
+          weight_decay: 0.0001
+    outs:
+    - path: models/cnn_best.pt
+      hash: md5
+      md5: e05f628e4dd5cd83cacd33aca3de1c1e
+      size: 16403677
+    - path: models/cnn_history.json
+      hash: md5
+      md5: 875229bd64de52d653d3558eeec7a703
+      size: 3862
+    - path: models/cnn_val_metrics.json
+      hash: md5
+      md5: 7e1bbd3836fa951fbaee739c70fbbd12
+      size: 28
+  evaluate:
+    cmd: python src/evaluate.py
+    deps:
+    - path: features/hog_test.npz
+      hash: md5
+      md5: fd9f137ca43ac149db816002c7abec6e
+      size: 2100315
+    - path: models/cnn_best.pt
+      hash: md5
+      md5: e05f628e4dd5cd83cacd33aca3de1c1e
+      size: 16403677
+    - path: models/mlp_model.pt
+      hash: md5
+      md5: 6612771b4c56bcefeaa32d8373618d0e
+      size: 13151000
+    - path: models/mlp_scaler.pkl
+      hash: md5
+      md5: 6bc7ff1941ede6d0272222dfc22f18e1
+      size: 146488
+    - path: models/svm_model.pkl
+      hash: md5
+      md5: 696c075cc47cca7e128d9603d25f5118
+      size: 8117890
+    - path: splits/label_map.csv
+      hash: md5
+      md5: 1ef23cad58845defb8e5aa4aaf043382
+      size: 247
+    - path: splits/test.csv
+      hash: md5
+      md5: be93761b4524ddfdccb38cc3dd2a9b74
+      size: 7123
+    - path: src/evaluate.py
+      hash: md5
+      md5: dfd566728710e0d0a8582e021dd69668
+      size: 9609
+    - path: src/train_mlp.py
+      hash: md5
+      md5: 2c9b7990e2ef46e0df357b29e69a1035
+      size: 8216
+    outs:
+    - path: metrics/all_models_f1.csv
+      hash: md5
+      md5: 5bff8459b6470e95833ff65f82eff4bd
+      size: 1441
+    - path: metrics/cnn_history.csv
+      hash: md5
+      md5: 4d93698438ba8984b6b85880d9be2685
+      size: 1056
+    - path: metrics/cnn_results.csv
+      hash: md5
+      md5: 9a28ee5398e8fdb7d7f8bb6d8b196a65
+      size: 629
+    - path: metrics/metrics.json
+      hash: md5
+      md5: 93ea7873740a03a57862ceb5a81a4ae3
+      size: 175
+    - path: metrics/mlp_history.csv
+      hash: md5
+      md5: b3f3a2f5f16791586499172eb6683482
+      size: 358
+    - path: metrics/mlp_results.csv
+      hash: md5
+      md5: 4b779e5c6b49f0d5a00f759704481671
+      size: 412
+    - path: metrics/svm_results.csv
+      hash: md5
+      md5: 25581a0b47725d858997bff3e6eaafb0
+      size: 430

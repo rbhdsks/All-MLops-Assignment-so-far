@@ -1,0 +1,34 @@
+# ─── Python ──────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.Python
+venv/
+env/
+.venv/
+
+# ─── Airflow runtime artefacts ───────────────────────
+logs/
+plugins/
+config/
+*.log
+
+# ─── Scraped data (regenerated on every run) ────────
+data/scraped/
+data/scraper.db
+data/*.db
+
+# ─── Local environment ──────────────────────────────
+.env
+.env.local
+
+# ─── OS / IDE clutter ───────────────────────────────
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*~
+
+# ─── Misc ───────────────────────────────────────────
+docker
